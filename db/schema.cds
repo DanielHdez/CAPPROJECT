@@ -1,5 +1,10 @@
 namespace com.dhl;
 
+using { cuid,
+        managed } from '@sap/cds/common';
+// // using { managed } from '@sap/cds/common';
+
+
 //type Name : String(20);
 
 // type Address {
@@ -61,10 +66,10 @@ namespace com.dhl;
 //     //Si queremos que ademas se pueda escribir en el campo virtual desde el cliente del servicio 
 //     @Core.Computed : false
 //     virtual discount_2 : Decimal;
-}
+// }
 
-entity Products {
-    key ID               : UUID;
+entity Products: cuid, managed{
+    // key ID               : UUID;
         // Name             : String default 'NoName';
         Name             : String not null;
         Description      : String;
@@ -80,8 +85,7 @@ entity Products {
         Supplier_ID      : UUID;
 };
 
-entity Suppliers {
-    key ID         : UUID;
+entity Suppliers: cuid {
         Name       : type of Products : Name; //String;   //Tomamos el dato del campo name de product
         Street     : String;
         City       : String;
@@ -152,8 +156,83 @@ entity ProductReview {
         comment : String;
 }
 
-entity SalesData {
-    key ID           : UUID;
+entity SalesData: cuid {
         DeliveryDate : Date;
         Revenue      : Decimal(16, 2);
 }
+
+
+entity SelProducts   as select from Products;
+
+entity SelProducts1  as
+    select from Products {
+        *
+    };
+
+entity SelProducts2  as
+    select from Products {
+        Name,
+        Price,
+        Quantity
+    };
+
+entity SelProducts3  as
+    select from Products
+    left join ProductReview
+        on Products.Name = ProductReview.Name
+    {
+        Rating,
+        Products.Name,
+        sum(
+            Price
+        ) as TotalPrice
+    }
+    group by
+        Rating,
+        Products.Name
+    order by
+        Rating;
+
+entity ProjProducts  as projection on Products;
+
+entity ProjProducts2 as projection on Products {
+    *
+};
+
+entity ProjProducts3 as projection on Products {
+    ReleaseDate, Name
+};
+
+// entity ParamProducts(pName : String)     as
+//     select from Products {
+//         Name,
+//         Price,
+//         Quantity
+//     }
+//     where
+//         Name = : pName;
+
+// entity ProjParamProducts(pName : String) as projection on Products where Name = : pName;
+
+extend Products with {
+    PriceCondition     : String(2);
+    PriceDetermination : String(3);
+};
+
+// entity Course {
+//     key ID      : UUID;
+//         Student : Association to many StudentCourse
+//                       on Student.Course = $self;
+// }
+
+// entity Student {
+//     key ID     : UUID;
+//         Course : Association to many StudentCourse
+//                      on Course.Student = $self;
+// }
+
+// entity StudentCourse {
+//     key ID      : UUID;
+//         Student : Association to Student;
+//         Course  : Association to Course;
+// }
