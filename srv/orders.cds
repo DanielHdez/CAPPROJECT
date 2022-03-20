@@ -1,5 +1,5 @@
 
-using { com.training as training } from './db/training';
+using { com.training as training } from '../db/training';
 
 
 service ManageOrders{
@@ -11,6 +11,9 @@ service ManageOrders{
         };
         message : String
     };
+
+    entity GetOrders as projection on training.Orders;  
+    entity CreateOrders as projection on training.Orders;  
 
     entity Orders as projection on training.Orders actions {
         function getClientTaxRate(clientEmail : String(65)) returns Decimal(4, 2);
